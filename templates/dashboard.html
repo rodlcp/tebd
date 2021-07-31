@@ -1,0 +1,147 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://code.jquery.com/jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=visualization&key=AIzaSyCXq8CMRpAVrN_GRcqVXYn8Jqj-wJ6_x9g"></script>
+    <title>Dashboard</title> 
+
+    <!-- Bootstrap core CSS -->
+    <link href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet">
+
+    <script type="text/javascript">
+      var intervalID = setInterval(updateMaps, 5000);
+      var current_drivers;
+      var riders_request;
+      var last_allocation;
+      var map1, map2, map3, map4;
+
+      function updateMaps() {
+        $.getJSON("http://127.0.0.1:5432/dashboard/update", function(data){
+          current_drivers = data.current_drivers;
+          riders_request = data.riders_request;
+          last_allocation = data.last_allocation;
+        });
+
+        var car = "M17.402,0H5.643C2.526,0,0,3.467,0,6.584v34.804c0,3.116,2.526,5.644,5.643,5.644h11.759c3.116,0,5.644-2.527,5.644-5.644 V6.584C23.044,3.467,20.518,0,17.402,0z M22.057,14.188v11.665l-2.729,0.351v-4.806L22.057,14.188z M20.625,10.773 c-1.016,3.9-2.219,8.51-2.219,8.51H4.638l-2.222-8.51C2.417,10.773,11.3,7.755,20.625,10.773z M3.748,21.713v4.492l-2.73-0.349 V14.502L3.748,21.713z M1.018,37.938V27.579l2.73,0.343v8.196L1.018,37.938z M2.575,40.882l2.218-3.336h13.771l2.219,3.336H2.575z M19.328,35.805v-7.872l2.729-0.355v10.048L19.328,35.805z";
+      
+        var car_icon = {
+          path: car,
+          scale: .7,
+          strokeColor: 'white',
+          strokeWeight: .10,
+          fillOpacity: 1,
+          fillColor: '#404040',
+          offset: '5%',
+          anchor: new google.maps.Point(10, 25) // orig 10,50 back of car, 10,0 front of car, 10,25 center of car
+        };
+
+        var base_icon = {
+            url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAiCAYAAACwaJKDAAAABmJLR0QA/wD/AP+gvaeTAAABXklEQVRIia3VP0vDQBjH8W9OKhicxT8vQYTi5CBOvgrfgVDo23BscfENdBA3oZvQxalbBSludVARxSW2QpTokOekiebumrsfPByBy4fnLsklwpxtYB/YAhSQAQ/ANXBrufdPDoEh8G2oocyzJgJOpCMTqCuT+ZEJ7Dhi5epUwe2aoK52GdwEpp7oVByUoMdAXLUvjonF+c3Is0tdI8g3dwmYAcuenQKkQKyARiAQcRrKOq1GFHnLaSAvBVL9PY8DoWMg08u/DIQWnA0gwe91SsQppOWJtqra79YEu6Y9iYDeguA5hqNPZwW4cQTvgFUbqNMEPh3QA1dQ59QCXiwKAqyRHzT/gRmwUwcFOKtAr+qCALsV6JEPCvkTngdnWJ64y9HXL10PgHdfdFC69tpPnXWKy98LgQK8CPhF/sUZ4/o7mch4D3yEQl/nUGtc0TcZk5Dos4yPIdEnGScuk38ATj3qJoebBh4AAAAASUVORK5CYII=",
+            labelOrigin: new google.maps.Point(10, 11)
+        };
+
+        var map1 = new google.maps.Map(document.getElementById("map_canvas1"), {
+            zoom: 12,
+            center: new google.maps.LatLng(38.895110, -77.036370)
+        });
+
+        var map2 = new google.maps.Map(document.getElementById("map_canvas2"), {
+            zoom: 12,
+            center: new google.maps.LatLng(38.895110, -77.036370)
+        });
+
+        var map3 = new google.maps.Map(document.getElementById("map_canvas3"), {
+            zoom: 12,
+            center: new google.maps.LatLng(38.895110, -77.036370)
+        });
+
+        var map4 = new google.maps.Map(document.getElementById("map_canvas4"), {
+            zoom: 12,
+            center: new google.maps.LatLng(38.895110, -77.036370)
+        });
+
+        for(i in current_drivers){
+          new google.maps.Marker({
+              position: new google.maps.LatLng(current_drivers[i][2], current_drivers[i][1]),
+              icon: car_icon,
+              map: map1
+          });
+        }
+
+        for(i in riders_request){
+          new google.maps.Marker({
+              position: new google.maps.LatLng(riders_request[i][1], riders_request[i][2]),
+              icon: base_icon,
+              map: map2
+          });
+        }
+
+        for(i in last_allocation){
+          new google.maps.Marker({
+              position: new google.maps.LatLng(last_allocation[i][2], last_allocation[i][3]),
+              icon: car_icon,
+              map: map3
+          });
+        }
+
+        for(i in last_allocation){
+          new google.maps.Marker({
+              position: new google.maps.LatLng(last_allocation[i][0], last_allocation[i][1]),
+              icon: base_icon,
+              map: map4
+          });
+        }        
+        return map1, map2, map3, map4
+      }
+    </script>
+
+  <style>
+    .bd-placeholder-img {
+      font-size: 1.125rem;
+      text-anchor: middle;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      user-select: none;
+    }
+
+    @media (min-width: 768px) {
+      .bd-placeholder-img-lg {
+        font-size: 3.5rem;
+      }
+    }
+  </style>
+  
+  <!-- Custom styles for this template -->
+  <link href="{{ url_for('static', filename='dashboard.css') }}" rel="stylesheet">
+</head>
+<body onload="updateMaps()">
+  <div class="container-fluid">
+    <div class="row h-50">
+      <main class="w-50 h-100 col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <div style="height: 100%;" class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <div id="map_canvas1" style="width: 100%; height: 100%;"></div>
+        </div>
+      </main>
+      <main class="w-50 h-100 col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <div style="height: 100%;" class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <div id="map_canvas2" style="width: 100%; height: 100%;"></div>
+        </div>
+      </main>
+    </div>
+    <div class="row h-50">
+      <main class="w-50 h-100 col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <div style="height: 100%;" class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <div id="map_canvas3" style="width: 100%; height: 100%;"></div>
+        </div>
+      </main>
+      <main class="w-50 h-100 col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <div style="height: 100%;" class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <div id="map_canvas4" style="width: 100%; height: 100%;"></div>
+        </div>
+      </main>
+    </div>
+  </div>
+</body>
+</html>
